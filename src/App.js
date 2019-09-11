@@ -1,28 +1,52 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import { connect } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import {checkLoggedIn} from './store/actions/authActions';
+
+import Navbar from './components/Navbar/Navbar';
+import MyRoutes from './Routes';
+
 import './App.css';
 
+
 class App extends Component {
+
+  componentDidMount() {
+    this.userSignedIn();
+  }
+
+  userSignedIn = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    // console.log(user)
+    if(user) {
+      this.props.checkLoggedIn(user , this.props.history)
+    }
+  }
+
+
   render() {
+    let routes = MyRoutes(this.props.status)
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Router>
+        <div className="App">
+          <Navbar />
+          <div>{routes}</div>
+        </div>
+      </Router>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    status : state.auth.status
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    checkLoggedIn : user => dispatch(checkLoggedIn(user))
+  }
+}
+
+export default connect(mapStateToProps , mapDispatchToProps)(App);
